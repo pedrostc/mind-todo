@@ -4,63 +4,77 @@
   import { TodoItem } from '../models/TodoItem';
   import { Note } from '../models/Note';
   import TodoItemComponent from './TodoItemComponent.svelte';
-  
+
   export let todoList: TodoList;
-  
+
   const dispatch = createEventDispatcher();
-  
+
   let newItemTitle = '';
-  
+
   // Format the date as "Month Day, Year"
   $: formattedDate = todoList.date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
-  
+
   function addItem() {
     if (newItemTitle.trim()) {
       todoList.createItem(newItemTitle);
+      // Force reactivity by reassigning the items array
+      todoList.items = [...todoList.items];
       newItemTitle = '';
     }
   }
-  
+
   function handleAddSubItem(event) {
     const { parentItem, title } = event.detail;
-    
+
     // Check if this would create a sub-sub-item
     if (parentItem.parentItem) {
       // Convert the sub-item to a main level item
       todoList.createSubItem(parentItem, title);
+      // Force reactivity by reassigning the items array
+      todoList.items = [...todoList.items];
     } else {
       parentItem.addSubItem(title);
+      // Force reactivity for sub-items
+      todoList.items = [...todoList.items];
     }
   }
-  
+
   function handleAddNote(event) {
     const { parentItem, content } = event.detail;
     parentItem.addNote(content);
+    // Force reactivity
+    todoList.items = [...todoList.items];
   }
-  
+
   function handleAddSubNote(event) {
     const { parentNote, content } = event.detail;
     parentNote.addSubNote(content);
+    // Force reactivity
+    todoList.items = [...todoList.items];
   }
-  
+
   function handleCreateTodoFromNote(event) {
     const note = event.detail;
     const newItem = note.createTodoItem();
     todoList.addItem(newItem);
+    // Force reactivity by reassigning the items array
+    todoList.items = [...todoList.items];
   }
-  
+
   function handleEditNote(event) {
     const { note, content } = event.detail;
     note.content = content;
+    // Force reactivity
+    todoList.items = [...todoList.items];
   }
-  
+
   function handleDeleteNote(event) {
     const noteToDelete = event.detail;
-    
+
     // Find the parent item or note
     if (noteToDelete.parentItem) {
       const parentItem = noteToDelete.parentItem;
@@ -75,12 +89,14 @@
         parentNote.subNotes.splice(index, 1);
       }
     }
+    // Force reactivity
+    todoList.items = [...todoList.items];
   }
-  
+
   function createNextDayList() {
     const tomorrow = new Date(todoList.date);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     const nextList = todoList.createNextDayList(tomorrow);
     dispatch('nextDayList', nextList);
   }
@@ -93,7 +109,7 @@
       Create Next Day List
     </button>
   </header>
-  
+
   <div class="add-item">
     <input 
       type="text" 
@@ -102,7 +118,7 @@
     />
     <button on:click={addItem}>Add</button>
   </div>
-  
+
   <div class="items">
     {#if todoList.items.length === 0}
       <p class="empty-message">No items for today. Add one above!</p>
@@ -128,19 +144,19 @@
     margin: 0 auto;
     padding: 16px;
   }
-  
+
   header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
   }
-  
+
   h1 {
     margin: 0;
     font-size: 1.5rem;
   }
-  
+
   .next-day-button {
     background: #4a90e2;
     color: white;
@@ -149,23 +165,23 @@
     padding: 8px 16px;
     cursor: pointer;
   }
-  
+
   .next-day-button:hover {
     background: #3a80d2;
   }
-  
+
   .add-item {
     display: flex;
     margin-bottom: 16px;
   }
-  
+
   .add-item input {
     flex: 1;
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px 0 0 4px;
   }
-  
+
   .add-item button {
     background: #4a90e2;
     color: white;
@@ -174,11 +190,11 @@
     padding: 8px 16px;
     cursor: pointer;
   }
-  
+
   .add-item button:hover {
     background: #3a80d2;
   }
-  
+
   .empty-message {
     text-align: center;
     color: #888;

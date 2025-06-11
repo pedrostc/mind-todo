@@ -27,6 +27,19 @@ export class TodoList {
   createSubItem(parentItem: TodoItem, title: string): TodoItem {
     // If the parent is already a sub-item, promote it to main level
     if (parentItem.parentItem) {
+      // Store reference to original parent
+      const originalParent = parentItem.parentItem;
+
+      // Remove from original parent's subItems array
+      const index = originalParent.subItems.indexOf(parentItem);
+      if (index !== -1) {
+        originalParent.subItems.splice(index, 1);
+      }
+
+      // Keep reference to original parent but mark as promoted
+      parentItem.originalParent = originalParent;
+      parentItem.parentItem = undefined;
+
       // Only add to main items list if it's not already there
       if (!this.items.includes(parentItem)) {
         this.items.push(parentItem);

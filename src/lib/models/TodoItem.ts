@@ -5,6 +5,7 @@ interface TodoItemOptions {
   age?: number;
   parentItem?: TodoItem;
   parentNote?: Note;
+  originalParent?: TodoItem;
 }
 
 export class TodoItem {
@@ -15,6 +16,7 @@ export class TodoItem {
   notes: Note[] = [];
   parentItem?: TodoItem;
   parentNote?: Note;
+  originalParent?: TodoItem;
 
   constructor(title: string, options: TodoItemOptions = {}) {
     this.title = title;
@@ -22,6 +24,7 @@ export class TodoItem {
     this.age = options.age ?? 0;
     this.parentItem = options.parentItem;
     this.parentNote = options.parentNote;
+    this.originalParent = options.originalParent;
   }
 
   addSubItem(title: string): TodoItem {
@@ -50,7 +53,8 @@ export class TodoItem {
     // Create a new item with incremented age
     const newItem = new TodoItem(this.title, {
       age: this.age + 1,
-      parentItem: this.parentItem
+      parentItem: this.parentItem,
+      originalParent: this.originalParent
     });
 
     // Carry over sub-items
@@ -73,15 +77,15 @@ export class TodoItem {
 
   getAllNotes(): Note[] {
     let allNotes: Note[] = [];
-    
+
     // Add this item's notes
     allNotes = allNotes.concat(this.notes);
-    
+
     // Add notes from sub-notes
     for (const note of this.notes) {
       allNotes = allNotes.concat(note.getAllNotes().slice(1)); // Skip the note itself
     }
-    
+
     return allNotes;
   }
 }
