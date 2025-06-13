@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, beforeEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
 import NoteComponent from './NoteComponent.svelte';
@@ -80,6 +80,36 @@ describe('NoteComponent', () => {
 
     expect(screen.getByDisplayValue('Test note')).toBeInTheDocument();
     expect(screen.getByText('Save')).toBeInTheDocument();
+  });
+
+  it('should dispatch editNote event when pressing Enter while editing', async () => {
+    const mockDispatch = vi.fn();
+
+    // Mock the createEventDispatcher
+    vi.mock('svelte', async () => {
+      const actual = await vi.importActual('svelte');
+      return {
+        ...actual,
+        createEventDispatcher: () => mockDispatch
+      };
+    });
+
+    render(NoteComponent, { props: { note } });
+
+    // Start editing
+    await fireEvent.click(screen.getByText('...'));
+    await fireEvent.click(screen.getByText('Edit'));
+
+    // Edit the note and press Enter
+    const input = screen.getByDisplayValue('Test note');
+    await fireEvent.input(input, { target: { value: 'Edited note' } });
+    await fireEvent.keyDown(input, { key: 'Enter' });
+
+    // Check that the dispatch function was called with the correct arguments
+    expect(mockDispatch).toHaveBeenCalledWith('editNote', { 
+      note, 
+      content: 'Edited note' 
+    });
   });
 
   it('should allow deleting a note', async () => {

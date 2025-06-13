@@ -43,6 +43,18 @@ describe('TodoListComponent', () => {
     expect(todoList.items[2].title).toBe('New item');
   });
 
+  it('should add a new todo item when pressing Enter', async () => {
+    render(TodoListComponent, { props: { todoList } });
+
+    const input = screen.getByPlaceholderText('Add a new item...');
+    await fireEvent.input(input, { target: { value: 'Enter item' } });
+    await fireEvent.keyDown(input, { key: 'Enter' });
+
+    // Check the model was updated correctly
+    expect(todoList.items.length).toBe(3);
+    expect(todoList.items[2].title).toBe('Enter item');
+  });
+
   it('should allow marking an item as completed', async () => {
     render(TodoListComponent, { props: { todoList } });
 

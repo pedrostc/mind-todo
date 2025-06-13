@@ -31,7 +31,7 @@
   }
 
   function saveEdit() {
-    dispatch('editNote', editedContent);
+    dispatch('editNote', { note, content: editedContent });
     isEditing = false;
   }
 
@@ -44,7 +44,11 @@
 <div class="note-container">
   {#if isEditing}
     <div class="edit-container">
-      <input type="text" bind:value={editedContent} />
+      <input 
+        type="text" 
+        bind:value={editedContent} 
+        on:keydown={(e) => e.key === 'Enter' && saveEdit()}
+      />
       <button on:click={saveEdit}>Save</button>
     </div>
   {:else}

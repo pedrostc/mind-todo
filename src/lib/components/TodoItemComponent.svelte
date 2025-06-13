@@ -108,6 +108,7 @@
         type="text" 
         placeholder="Add a sub-item..." 
         bind:value={newSubItemTitle}
+        on:keydown={(e) => e.key === 'Enter' && addSubItem()}
       />
       <button on:click={addSubItem}>Add</button>
     </div>
@@ -119,6 +120,7 @@
         type="text" 
         placeholder="Add a note..." 
         bind:value={newNoteContent}
+        on:keydown={(e) => e.key === 'Enter' && addNote()}
       />
       <button on:click={addNote}>Add</button>
     </div>

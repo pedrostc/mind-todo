@@ -1,8 +1,6 @@
 ﻿<script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { TodoList } from '../models/TodoList';
-  import { TodoItem } from '../models/TodoItem';
-  import { Note } from '../models/Note';
   import TodoItemComponent from './TodoItemComponent.svelte';
 
   export let todoList: TodoList;
@@ -115,6 +113,7 @@
       type="text" 
       placeholder="Add a new item..." 
       bind:value={newItemTitle}
+      on:keydown={(e) => e.key === 'Enter' && addItem()}
     />
     <button on:click={addItem}>Add</button>
   </div>
