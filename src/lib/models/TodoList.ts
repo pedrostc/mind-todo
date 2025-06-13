@@ -4,6 +4,7 @@ import { Note } from './Note';
 export class TodoList {
   date: Date;
   items: TodoItem[] = [];
+  private nextId: number = 1; // Start IDs from 1
 
   constructor(date: Date) {
     this.date = date;
@@ -14,7 +15,7 @@ export class TodoList {
   }
 
   createItem(title: string): TodoItem {
-    const item = new TodoItem(title);
+    const item = new TodoItem(title, { id: this.nextId++ });
     this.addItem(item);
     return item;
   }
@@ -47,12 +48,12 @@ export class TodoList {
 
       // Create a new sub-item directly instead of using addSubItem
       // This bypasses the check in TodoItem.addSubItem
-      const subItem = new TodoItem(title, { parentItem });
+      const subItem = new TodoItem(title, { parentItem, id: this.nextId++ });
       parentItem.subItems.push(subItem);
       return subItem;
     }
 
-    return parentItem.addSubItem(title);
+    return parentItem.addSubItem(title, this.nextId++);
   }
 
   getAllItems(): TodoItem[] {
@@ -87,6 +88,14 @@ export class TodoList {
     for (const item of this.items) {
       const carriedItem = item.carryOver();
       if (carriedItem) {
+        // Assign new ID to carried-over item
+        carriedItem.id = nextList.getNextId();
+
+        // Assign new IDs to carried-over sub-items
+        for (const subItem of carriedItem.subItems) {
+          subItem.id = nextList.getNextId();
+        }
+
         nextList.addItem(carriedItem);
       }
     }
@@ -99,5 +108,12 @@ export class TodoList {
    */
   static createFirstList(date: Date): TodoList {
     return new TodoList(date);
+  }
+
+  /**
+   * Returns the next available ID and increments the counter.
+   */
+  getNextId(): number {
+    return this.nextId++;
   }
 }

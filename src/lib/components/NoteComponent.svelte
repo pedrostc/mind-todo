@@ -44,11 +44,10 @@
 <div class="note-container">
   {#if isEditing}
     <div class="edit-container">
-      <input 
-        type="text" 
+      <textarea 
         bind:value={editedContent} 
-        on:keydown={(e) => e.key === 'Enter' && saveEdit()}
-      />
+        rows="3"
+      ></textarea>
       <button on:click={saveEdit}>Save</button>
     </div>
   {:else}
@@ -85,7 +84,7 @@
 
   .note-content {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     position: relative;
     padding: 4px;
     border-radius: 3px;
@@ -95,13 +94,16 @@
   .note-text {
     font-style: italic;
     color: #555;
+    flex: 1;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 
   .menu-button {
     background: none;
     border: none;
     cursor: pointer;
-    margin-left: 8px;
+    margin-left: auto;
   }
 
   .menu {
@@ -134,10 +136,12 @@
     margin: 4px 0;
   }
 
-  .edit-container input {
+  .edit-container textarea {
     flex: 1;
     padding: 4px 8px;
     margin-right: 8px;
+    resize: vertical;
+    min-height: 60px;
   }
 
   .sub-notes {

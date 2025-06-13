@@ -58,6 +58,8 @@
   function handleCreateTodoFromNote(event) {
     const note = event.detail;
     const newItem = note.createTodoItem();
+    // Assign a new ID to the todo item
+    newItem.id = todoList.getNextId();
     todoList.addItem(newItem);
     // Force reactivity by reassigning the items array
     todoList.items = [...todoList.items];

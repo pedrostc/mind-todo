@@ -110,6 +110,7 @@
         checked={item.completed} 
         on:change={toggleCompleted}
       />
+      <span class="item-id">{item.id}</span>
       <span class={item.completed ? 'completed' : ''} on:click={startEditing}>{item.title}</span>
 
       {#if item.age > 0}
@@ -118,6 +119,10 @@
 
       {#if item.originalParent}
         <span class="parent-tag">from: {item.originalParent.title}</span>
+      {/if}
+
+      {#if item.parentNote && item.parentNote.getParentReference()}
+        <span class="reference-tag">ref: {item.parentNote.getParentReference()}</span>
       {/if}
 
       <button class="menu-button" on:click={toggleMenu}>...</button>
@@ -202,6 +207,10 @@
     position: relative;
   }
 
+  .item-header input[type="checkbox"] {
+    margin-right: 8px;
+  }
+
   .completed {
     text-decoration: line-through;
     color: #888;
@@ -216,11 +225,32 @@
     border-radius: 10px;
   }
 
+  .item-id {
+    margin-right: 8px;
+    font-size: 0.8em;
+    color: #fff;
+    background: #333;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+    display: inline-block;
+  }
+
   .parent-tag {
     margin-left: 8px;
     font-size: 0.8em;
     color: #fff;
     background: #4a90e2;
+    padding: 2px 6px;
+    border-radius: 10px;
+  }
+
+  .reference-tag {
+    margin-left: 8px;
+    font-size: 0.8em;
+    color: #fff;
+    background: #6c5ce7;
     padding: 2px 6px;
     border-radius: 10px;
   }

@@ -6,12 +6,14 @@ interface TodoItemOptions {
   parentItem?: TodoItem;
   parentNote?: Note;
   originalParent?: TodoItem;
+  id?: number;
 }
 
 export class TodoItem {
   title: string;
   completed: boolean;
   age: number;
+  id: number;
   subItems: TodoItem[] = [];
   notes: Note[] = [];
   parentItem?: TodoItem;
@@ -22,18 +24,19 @@ export class TodoItem {
     this.title = title;
     this.completed = options.completed ?? false;
     this.age = options.age ?? 0;
+    this.id = options.id ?? 0; // Default to 0, will be set by TodoList
     this.parentItem = options.parentItem;
     this.parentNote = options.parentNote;
     this.originalParent = options.originalParent;
   }
 
-  addSubItem(title: string): TodoItem {
+  addSubItem(title: string, id?: number): TodoItem {
     // Check if this is already a sub-item (can't have sub-sub-items)
     if (this.parentItem) {
       throw new Error('Cannot add sub-items to a sub-item. Only one level of nesting is allowed.');
     }
 
-    const subItem = new TodoItem(title, { parentItem: this });
+    const subItem = new TodoItem(title, { parentItem: this, id });
     this.subItems.push(subItem);
     return subItem;
   }

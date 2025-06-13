@@ -30,17 +30,35 @@ export class Note {
       parentNote: this,
       level: this.level + 1
     });
-    
+
     this.subNotes.push(subNote);
     return subNote;
   }
 
   createTodoItem(): TodoItem {
+    // Create a new todo item with a reference to this note
     const todoItem = new TodoItem(this.content, {
       parentNote: this
     });
-    
+
     return todoItem;
+  }
+
+  /**
+   * Gets the parent item's ID, or if the parent is a sub-item, returns the parent item's ID and the sub-item's ID
+   * in the format "item.sub-item".
+   */
+  getParentReference(): string | undefined {
+    if (this.parentItem) {
+      if (this.parentItem.parentItem) {
+        // This is a note of a sub-item, format: "parent.sub"
+        return `${this.parentItem.parentItem.id}.${this.parentItem.id}`;
+      } else {
+        // This is a note of a main item
+        return `${this.parentItem.id}`;
+      }
+    }
+    return undefined;
   }
 
   getFormattedContent(): string {
@@ -51,12 +69,12 @@ export class Note {
 
   getAllNotes(): Note[] {
     let allNotes: Note[] = [this];
-    
+
     // Add all sub-notes in a depth-first manner
     for (const subNote of this.subNotes) {
       allNotes = allNotes.concat(subNote.getAllNotes());
     }
-    
+
     return allNotes;
   }
 }
