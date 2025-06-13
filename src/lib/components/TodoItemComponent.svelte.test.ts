@@ -4,11 +4,23 @@ import { render, screen, fireEvent } from '@testing-library/svelte';
 import TodoItemComponent from './TodoItemComponent.svelte';
 import { TodoItem } from '../models/TodoItem';
 
+// Create a mock for createEventDispatcher
+const mockDispatch = vi.fn();
+
+// Mock the Svelte module
+vi.mock('svelte', () => {
+  return {
+    createEventDispatcher: () => mockDispatch
+  };
+});
+
 describe('TodoItemComponent', () => {
   let todoItem: TodoItem;
 
   beforeEach(() => {
     todoItem = new TodoItem('Test item');
+    // Reset the mock before each test
+    mockDispatch.mockReset();
   });
 
   it('should render the todo item title', () => {
@@ -69,17 +81,7 @@ describe('TodoItemComponent', () => {
   });
 
   it('should dispatch addSubItem event when pressing Enter in sub-item input', async () => {
-    const mockDispatch = vi.fn();
     vi.spyOn(todoItem, 'addSubItem');
-
-    // Mock the createEventDispatcher
-    vi.mock('svelte', async () => {
-      const actual = await vi.importActual('svelte');
-      return {
-        ...actual,
-        createEventDispatcher: () => mockDispatch
-      };
-    });
 
     render(TodoItemComponent, { props: { item: todoItem } });
 
@@ -111,16 +113,6 @@ describe('TodoItemComponent', () => {
   });
 
   it('should dispatch addNote event when pressing Enter in note input', async () => {
-    const mockDispatch = vi.fn();
-
-    // Mock the createEventDispatcher
-    vi.mock('svelte', async () => {
-      const actual = await vi.importActual('svelte');
-      return {
-        ...actual,
-        createEventDispatcher: () => mockDispatch
-      };
-    });
 
     render(TodoItemComponent, { props: { item: todoItem } });
 
@@ -149,5 +141,51 @@ describe('TodoItemComponent', () => {
     // Open the note's menu
     await fireEvent.click(screen.getAllByText('...')[1]);
     expect(screen.getByText('Create Todo')).toBeInTheDocument();
+  });
+
+  it('should allow editing a todo item through the menu', async () => {
+    render(TodoItemComponent, { props: { item: todoItem } });
+
+    // Open the menu
+    await fireEvent.click(screen.getByText('...'));
+    expect(screen.getByText('Edit')).toBeInTheDocument();
+
+    // Click the Edit button
+    await fireEvent.click(screen.getByText('Edit'));
+
+    // Check that the edit form is displayed with the current title
+    const input = screen.getByDisplayValue('Test item');
+    expect(input).toBeInTheDocument();
+  });
+
+  it('should allow editing a todo item by clicking on the text', async () => {
+    render(TodoItemComponent, { props: { item: todoItem } });
+
+    // Click directly on the todo item text
+    await fireEvent.click(screen.getByText('Test item'));
+
+    // Check that the edit form is displayed with the current title
+    const input = screen.getByDisplayValue('Test item');
+    expect(input).toBeInTheDocument();
+  });
+
+  it('should dispatch editItem event when saving an edit', async () => {
+
+    render(TodoItemComponent, { props: { item: todoItem } });
+
+    // Open the menu and click Edit
+    await fireEvent.click(screen.getByText('...'));
+    await fireEvent.click(screen.getByText('Edit'));
+
+    // Edit the title and save
+    const input = screen.getByDisplayValue('Test item');
+    await fireEvent.input(input, { target: { value: 'Updated item' } });
+    await fireEvent.click(screen.getByText('Save'));
+
+    // Check that the dispatch function was called with the correct arguments
+    expect(mockDispatch).toHaveBeenCalledWith('editItem', {
+      item: todoItem,
+      title: 'Updated item'
+    });
   });
 });

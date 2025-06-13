@@ -5,6 +5,16 @@ import NoteComponent from './NoteComponent.svelte';
 import { Note } from '../models/Note';
 import { TodoItem } from '../models/TodoItem';
 
+// Create a mock for createEventDispatcher
+const mockDispatch = vi.fn();
+
+// Mock the Svelte module
+vi.mock('svelte', () => {
+  return {
+    createEventDispatcher: () => mockDispatch
+  };
+});
+
 describe('NoteComponent', () => {
   let note: Note;
   let parentItem: TodoItem;
@@ -12,6 +22,8 @@ describe('NoteComponent', () => {
   beforeEach(() => {
     parentItem = new TodoItem('Parent item');
     note = new Note('Test note', { parentItem });
+    // Reset the mock before each test
+    mockDispatch.mockReset();
   });
 
   it('should render the note content', () => {
@@ -71,7 +83,7 @@ describe('NoteComponent', () => {
     expect(screen.getByText('Create Todo')).toBeInTheDocument();
   });
 
-  it('should allow editing a note', async () => {
+  it('should allow editing a note through the menu', async () => {
     // Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
     render(NoteComponent, { props: { note } });
 
@@ -82,17 +94,17 @@ describe('NoteComponent', () => {
     expect(screen.getByText('Save')).toBeInTheDocument();
   });
 
-  it('should dispatch editNote event when pressing Enter while editing', async () => {
-    const mockDispatch = vi.fn();
+  it('should allow editing a note by clicking on the text', async () => {
+    render(NoteComponent, { props: { note } });
 
-    // Mock the createEventDispatcher
-    vi.mock('svelte', async () => {
-      const actual = await vi.importActual('svelte');
-      return {
-        ...actual,
-        createEventDispatcher: () => mockDispatch
-      };
-    });
+    // Click directly on the note text
+    await fireEvent.click(screen.getByTestId('note-text'));
+
+    expect(screen.getByDisplayValue('Test note')).toBeInTheDocument();
+    expect(screen.getByText('Save')).toBeInTheDocument();
+  });
+
+  it('should dispatch editNote event when pressing Enter while editing', async () => {
 
     render(NoteComponent, { props: { note } });
 

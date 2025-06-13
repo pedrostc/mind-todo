@@ -53,7 +53,7 @@
     </div>
   {:else}
     <div class="note-content" data-testid="note-content" data-level={note.level}>
-      <span class="note-text" data-testid="note-text">{note.content}</span>
+      <span class="note-text" data-testid="note-text" on:click={startEditing}>{note.content}</span>
       <button class="menu-button" on:click={toggleMenu}>...</button>
 
       {#if showMenu}

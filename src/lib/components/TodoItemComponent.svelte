@@ -10,8 +10,10 @@
   let showMenu = false;
   let showAddSubItem = false;
   let showAddNote = false;
+  let isEditing = false;
   let newSubItemTitle = '';
   let newNoteContent = '';
+  let editedTitle = item.title;
 
   function toggleMenu() {
     showMenu = !showMenu;
@@ -73,34 +75,62 @@
   function handleDeleteNote(event) {
     dispatch('deleteNote', event.detail);
   }
+
+  function startEditing() {
+    isEditing = true;
+    editedTitle = item.title;
+    showMenu = false;
+  }
+
+  function saveEdit() {
+    if (editedTitle.trim()) {
+      dispatch('editItem', {
+        item,
+        title: editedTitle
+      });
+      isEditing = false;
+    }
+  }
 </script>
 
 <div class="todo-item">
-  <div class="item-header">
-    <input 
-      type="checkbox" 
-      checked={item.completed} 
-      on:change={toggleCompleted}
-    />
-    <span class={item.completed ? 'completed' : ''}>{item.title}</span>
+  {#if isEditing}
+    <div class="edit-container">
+      <input 
+        type="text" 
+        bind:value={editedTitle} 
+        on:keydown={(e) => e.key === 'Enter' && saveEdit()}
+      />
+      <button on:click={saveEdit}>Save</button>
+    </div>
+  {:else}
+    <div class="item-header">
+      <input 
+        type="checkbox" 
+        checked={item.completed} 
+        on:change={toggleCompleted}
+      />
+      <span class={item.completed ? 'completed' : ''} on:click={startEditing}>{item.title}</span>
 
-    {#if item.age > 0}
-      <span class="age">{item.age} {item.age === 1 ? 'day' : 'days'}</span>
-    {/if}
+      {#if item.age > 0}
+        <span class="age">{item.age} {item.age === 1 ? 'day' : 'days'}</span>
+      {/if}
 
-    {#if item.originalParent}
-      <span class="parent-tag">from: {item.originalParent.title}</span>
-    {/if}
+      {#if item.originalParent}
+        <span class="parent-tag">from: {item.originalParent.title}</span>
+      {/if}
 
-    <button class="menu-button" on:click={toggleMenu}>...</button>
+      <button class="menu-button" on:click={toggleMenu}>...</button>
 
-    {#if showMenu}
-      <div class="menu">
-        <button on:click={openAddSubItem}>Add Sub-item</button>
-        <button on:click={openAddNote}>Add Note</button>
-      </div>
-    {/if}
-  </div>
+      {#if showMenu}
+        <div class="menu">
+          <button on:click={openAddSubItem}>Add Sub-item</button>
+          <button on:click={openAddNote}>Add Note</button>
+          <button on:click={startEditing}>Edit</button>
+        </div>
+      {/if}
+    </div>
+  {/if}
 
   {#if showAddSubItem}
     <div class="add-form">
@@ -136,6 +166,7 @@
           on:addSubNote 
           on:createTodoFromNote 
           on:editNote 
+          on:editItem
           on:deleteNote
         />
       {/each}
@@ -226,12 +257,12 @@
     background: #f5f5f5;
   }
 
-  .add-form {
+  .add-form, .edit-container {
     display: flex;
     margin: 8px 0;
   }
 
-  .add-form input {
+  .add-form input, .edit-container input {
     flex: 1;
     padding: 4px 8px;
     margin-right: 8px;

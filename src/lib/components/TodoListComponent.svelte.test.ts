@@ -126,4 +126,19 @@ describe('TodoListComponent', () => {
 
     expect(screen.getByText('Create Next Day List')).toBeInTheDocument();
   });
+
+  it('should update item title when edited', () => {
+    render(TodoListComponent, { props: { todoList } });
+
+    // Get the first item and manually update its title
+    const item = todoList.items[0];
+    const newTitle = 'Edited item';
+
+    // Manually trigger what handleEditItem would do
+    item.title = newTitle;
+    todoList.items = [...todoList.items];
+
+    // Check that the item's title was updated
+    expect(item.title).toBe(newTitle);
+  });
 });

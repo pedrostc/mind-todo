@@ -70,6 +70,13 @@
     todoList.items = [...todoList.items];
   }
 
+  function handleEditItem(event) {
+    const { item, title } = event.detail;
+    item.title = title;
+    // Force reactivity
+    todoList.items = [...todoList.items];
+  }
+
   function handleDeleteNote(event) {
     const noteToDelete = event.detail;
 
@@ -130,6 +137,7 @@
           on:addSubNote={handleAddSubNote}
           on:createTodoFromNote={handleCreateTodoFromNote}
           on:editNote={handleEditNote}
+          on:editItem={handleEditItem}
           on:deleteNote={handleDeleteNote}
         />
       {/each}
