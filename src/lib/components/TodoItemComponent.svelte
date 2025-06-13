@@ -156,6 +156,20 @@
     </div>
   {/if}
 
+  {#if item.notes.length > 0}
+    <div class="notes">
+      {#each item.notes as note}
+        <NoteComponent 
+          {note} 
+          on:addSubNote={handleAddSubNote} 
+          on:createTodo={handleCreateTodoFromNote}
+          on:editNote={handleEditNote}
+          on:deleteNote={handleDeleteNote}
+        />
+      {/each}
+    </div>
+  {/if}
+
   {#if item.subItems.length > 0}
     <div class="sub-items">
       {#each item.subItems as subItem}
@@ -168,20 +182,6 @@
           on:editNote 
           on:editItem
           on:deleteNote
-        />
-      {/each}
-    </div>
-  {/if}
-
-  {#if item.notes.length > 0}
-    <div class="notes">
-      {#each item.notes as note}
-        <NoteComponent 
-          {note} 
-          on:addSubNote={handleAddSubNote} 
-          on:createTodo={handleCreateTodoFromNote}
-          on:editNote={handleEditNote}
-          on:deleteNote={handleDeleteNote}
         />
       {/each}
     </div>
@@ -271,11 +271,17 @@
   .sub-items {
     margin-left: 24px;
     margin-top: 8px;
+    border-left: 2px solid #4a90e2;
+    padding-left: 8px;
   }
 
   .notes {
     margin-top: 8px;
+    margin-left: 24px;
     padding-top: 8px;
     border-top: 1px dashed #eee;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    padding: 8px;
   }
 </style>

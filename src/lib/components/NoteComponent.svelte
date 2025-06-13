@@ -87,6 +87,14 @@
     display: flex;
     align-items: center;
     position: relative;
+    padding: 4px;
+    border-radius: 3px;
+    background-color: #f9f9f9;
+  }
+
+  .note-text {
+    font-style: italic;
+    color: #555;
   }
 
   .menu-button {
@@ -134,5 +142,8 @@
 
   .sub-notes {
     margin-left: 16px;
+    border-left: 1px dashed #aaa;
+    padding-left: 8px;
+    margin-top: 4px;
   }
 </style>
