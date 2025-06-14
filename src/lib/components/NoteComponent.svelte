@@ -1,10 +1,25 @@
 ﻿<script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import { Note } from '../models/Note';
+	import { activeMenuId, toggleMenu as toggleGlobalMenu, closeAllMenus } from '../stores/menuStore';
 
 	export let note: Note;
 
 	const dispatch = createEventDispatcher();
+	const menuId = `note-${note.id || note.content.substring(0, 10)}`;
+
+	// Subscribe to the activeMenuId store to determine if this menu is active
+	let isMenuActive = false;
+	const unsubscribe = activeMenuId.subscribe(id => {
+		isMenuActive = id === menuId;
+	});
+
+	// Cleanup subscription when component is destroyed
+	onMount(() => {
+		return () => {
+			unsubscribe();
+		};
+	});
 
 	// Click outside action
 	function clickOutside(
@@ -30,29 +45,28 @@
 		};
 	}
 
-	let showMenu = false;
 	let isEditing = false;
 	let editedContent = note.content;
 	let editTextarea: HTMLTextAreaElement;
 
 	function toggleMenu(): void {
-		showMenu = !showMenu;
+		toggleGlobalMenu(menuId);
 	}
 
 	function addSubNote(): void {
 		dispatch('addSubNote', note);
-		showMenu = false;
+		closeAllMenus();
 	}
 
 	function createTodo(): void {
 		dispatch('createTodo', note);
-		showMenu = false;
+		closeAllMenus();
 	}
 
 	function startEditing(): void {
 		isEditing = true;
 		editedContent = note.content;
-		showMenu = false;
+		closeAllMenus();
 		// Focus the textarea after the DOM updates
 		setTimeout(() => editTextarea?.focus(), 0);
 	}
@@ -64,11 +78,11 @@
 
 	function deleteNote(): void {
 		dispatch('deleteNote', note);
-		showMenu = false;
+		closeAllMenus();
 	}
 </script>
 
-<div class="note-container" role="application" on:contextmenu={(event) => { toggleMenu(); event.preventDefault(); }}>
+<div class="note-container" role="application" on:contextmenu={(event) => { closeAllMenus(); toggleMenu(); event.preventDefault(); event.stopPropagation(); }}>
 	{#if isEditing}
 		<div class="edit-container">
 			<textarea
@@ -90,12 +104,12 @@
 				on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && startEditing()}
 				>{note.content}</span
 			>
-			<button class="menu-button" on:click={toggleMenu}>...</button>
+			<button class="menu-button" on:click={(event) => { event.stopPropagation(); toggleMenu(); }}>...</button>
 
-			{#if showMenu}
+			{#if isMenuActive}
 				<div
 					class="menu"
-					use:clickOutside={{ enabled: showMenu, callback: () => (showMenu = false) }}
+					use:clickOutside={{ enabled: isMenuActive, callback: closeAllMenus }}
 				>
 					{#if note.level < 2}
 						<button on:click={addSubNote}>Add Sub-note</button>
