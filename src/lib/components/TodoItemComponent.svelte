@@ -138,7 +138,7 @@
 	}
 </script>
 
-<div class="todo-item">
+<div class="todo-item" role="application" on:contextmenu={(event) => { toggleMenu(); event.preventDefault(); }}>
 	{#if isEditing}
 		<div class="edit-container">
 			<input
@@ -155,7 +155,13 @@
 			<span class="item-id">
 				{getItemIdPath(item)}
 			</span>
-			<span class={item.completed ? 'completed' : ''} on:click={startEditing}>{item.title}</span>
+			<span
+				class={item.completed ? 'completed' : ''}
+				role="button"
+				tabindex="0"
+				on:click={startEditing}
+				on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && startEditing()}>{item.title}</span
+			>
 
 			{#if item.age > 0}
 				<span class="age">{item.age} {item.age === 1 ? 'day' : 'days'}</span>

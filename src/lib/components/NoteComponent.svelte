@@ -68,7 +68,7 @@
 	}
 </script>
 
-<div class="note-container">
+<div class="note-container" role="application" on:contextmenu={(event) => { toggleMenu(); event.preventDefault(); }}>
 	{#if isEditing}
 		<div class="edit-container">
 			<textarea
@@ -81,7 +81,15 @@
 		</div>
 	{:else}
 		<div class="note-content" data-testid="note-content" data-level={note.level}>
-			<span class="note-text" data-testid="note-text" on:click={startEditing}>{note.content}</span>
+			<span
+				class="note-text"
+				data-testid="note-text"
+				role="button"
+				tabindex="0"
+				on:click={startEditing}
+				on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && startEditing()}
+				>{note.content}</span
+			>
 			<button class="menu-button" on:click={toggleMenu}>...</button>
 
 			{#if showMenu}
