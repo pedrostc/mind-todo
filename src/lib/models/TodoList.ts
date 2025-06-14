@@ -31,6 +31,9 @@ export class TodoList {
 			// Store reference to original parent
 			const originalParent = parentItem.parentItem;
 
+			// Assign a new ID to the promoted parentItem
+			parentItem.id = this.getNextId();
+
 			// Remove from original parent's subItems array
 			const index = originalParent.subItems.indexOf(parentItem);
 			if (index !== -1) {

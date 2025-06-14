@@ -115,4 +115,44 @@ describe('TodoList', () => {
 		expect(subItem.subItems.length).toBe(1);
 		expect(subItem.subItems[0]).toBe(subSubItem);
 	});
+
+	it('should promote a sub-task with existing sub-tasks, assigning a new ID to the promoted task', () => {
+		const list = new TodoList(new Date());
+		const mainTask = list.createItem('Main Task');
+		const promotedTask = list.createSubItem(mainTask, 'Promoted Task'); // Becomes sub-item of mainTask
+		const childOfPromotedTask = list.createSubItem(promotedTask, 'Child of Promoted Task'); // Becomes sub-item of promotedTask
+
+		const originalPromotedTaskId = promotedTask.id;
+
+		// Act: Promote 'promotedTask' by adding a new sub-item to it.
+		// This call will make 'promotedTask' a main-level item.
+		const newSubTaskForPromoted = list.createSubItem(promotedTask, 'New Sub-task for Promoted');
+
+		// Assert
+		// 1. Promoted task gets a new ID
+		expect(promotedTask.id).not.toBe(originalPromotedTaskId);
+		expect(promotedTask.id).toBeGreaterThan(originalPromotedTaskId); // New IDs are incremental
+
+		// 2. Promoted task's original parent is maintained
+		expect(promotedTask.originalParent).toBe(mainTask);
+
+		// 3. Child of the promoted task still points to the promoted task
+		expect(childOfPromotedTask.parentItem).toBe(promotedTask);
+		// Ensure childOfPromotedTask is still part of promotedTask's subItems
+		expect(promotedTask.subItems).toContain(childOfPromotedTask);
+
+		// 4. The new sub-task (that triggered promotion) correctly has promotedTask as its parent
+		expect(newSubTaskForPromoted.parentItem).toBe(promotedTask);
+		expect(promotedTask.subItems).toContain(newSubTaskForPromoted);
+
+		// 5. Check structure: mainTask should no longer have promotedTask as a direct subItem (it's promoted)
+		expect(mainTask.subItems).not.toContain(promotedTask);
+
+		// 6. PromotedTask should now be a top-level item in the list
+		expect(list.items).toContain(promotedTask);
+
+		// 7. Check sub-item counts
+		expect(mainTask.subItems.length).toBe(0); // Assuming promotedTask was its only subitem
+		expect(promotedTask.subItems.length).toBe(2); // childOfPromotedTask and newSubTaskForPromoted
+	});
 });
