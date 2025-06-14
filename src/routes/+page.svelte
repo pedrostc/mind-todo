@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { TodoList } from '$lib/models/TodoList';
 	import TodoListComponent from '$lib/components/TodoListComponent.svelte';
+	import { closeAllMenus } from '$lib/stores/menuStore';
 
 	let currentList: TodoList;
 	let allLists: TodoList[] = [];
@@ -11,6 +12,16 @@
 		const today = new Date();
 		currentList = TodoList.createFirstList(today);
 		allLists = [currentList];
+
+		// Add a global click handler to close menus when clicking anywhere
+		document.addEventListener('click', (event) => {
+			// Only close menus if the click wasn't on a menu or menu button
+			// This is handled by checking if the event has been defaultPrevented
+			// by a menu's clickOutside directive
+			if (!event.defaultPrevented) {
+				closeAllMenus();
+			}
+		});
 	});
 
 	function handleNextDayList(event: CustomEvent<TodoList>) {

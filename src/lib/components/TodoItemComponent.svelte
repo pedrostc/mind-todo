@@ -1,11 +1,26 @@
 ﻿<script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import { TodoItem } from '../models/TodoItem';
 	import NoteComponent from './NoteComponent.svelte';
+	import { activeMenuId, toggleMenu as toggleGlobalMenu, closeAllMenus } from '../stores/menuStore';
 
 	export let item: TodoItem;
 
 	const dispatch = createEventDispatcher();
+	const menuId = `todo-item-${item.id}`;
+
+	// Subscribe to the activeMenuId store to determine if this menu is active
+	let isMenuActive = false;
+	const unsubscribe = activeMenuId.subscribe(id => {
+		isMenuActive = id === menuId;
+	});
+
+	// Cleanup subscription when component is destroyed
+	onMount(() => {
+		return () => {
+			unsubscribe();
+		};
+	});
 
 	// Click outside action
 	function clickOutside(
@@ -31,7 +46,6 @@
 		};
 	}
 
-	let showMenu = false;
 	let showAddSubItem = false;
 	let showAddNote = false;
 	let isEditing = false;
@@ -55,7 +69,7 @@
 	}
 
 	function toggleMenu(): void {
-		showMenu = !showMenu;
+		toggleGlobalMenu(menuId);
 	}
 
 	function toggleCompleted(): void {
@@ -64,7 +78,7 @@
 
 	function openAddSubItem(): void {
 		showAddSubItem = true;
-		showMenu = false;
+		closeAllMenus();
 		// Focus the input after the DOM updates
 		setTimeout(() => subItemInput?.focus(), 0);
 	}
@@ -82,7 +96,7 @@
 
 	function openAddNote(): void {
 		showAddNote = true;
-		showMenu = false;
+		closeAllMenus();
 		// Focus the input after the DOM updates
 		setTimeout(() => noteInput?.focus(), 0);
 	}
@@ -122,7 +136,7 @@
 	function startEditing(): void {
 		isEditing = true;
 		editedTitle = item.title;
-		showMenu = false;
+		closeAllMenus();
 		// Focus the input after the DOM updates
 		setTimeout(() => editInput?.focus(), 0);
 	}
@@ -138,7 +152,7 @@
 	}
 </script>
 
-<div class="todo-item" role="application" on:contextmenu={(event) => { toggleMenu(); event.preventDefault(); }}>
+<div class="todo-item" role="application" on:contextmenu={(event) => { closeAllMenus(); toggleMenu(); event.preventDefault(); event.stopPropagation(); }}>
 	{#if isEditing}
 		<div class="edit-container">
 			<input
@@ -175,12 +189,12 @@
 				<span class="reference-tag">ref: {item.parentNote.getParentReference()}</span>
 			{/if}
 
-			<button class="menu-button" on:click={toggleMenu}>...</button>
+			<button class="menu-button" on:click={(event) => { event.stopPropagation(); toggleMenu(); }}>...</button>
 
-			{#if showMenu}
+			{#if isMenuActive}
 				<div
 					class="menu"
-					use:clickOutside={{ enabled: showMenu, callback: () => (showMenu = false) }}
+					use:clickOutside={{ enabled: isMenuActive, callback: closeAllMenus }}
 				>
 					<button on:click={openAddSubItem}>Add Sub-item</button>
 					<button on:click={openAddNote}>Add Note</button>
