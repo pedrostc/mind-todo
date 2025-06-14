@@ -10,125 +10,124 @@ const mockDispatch = vi.fn();
 
 // Mock the Svelte module
 vi.mock('svelte', () => {
-  return {
-    createEventDispatcher: () => mockDispatch
-  };
+	return {
+		createEventDispatcher: () => mockDispatch
+	};
 });
 
 describe('NoteComponent', () => {
-  let note: Note;
-  let parentItem: TodoItem;
+	let note: Note;
+	let parentItem: TodoItem;
 
-  beforeEach(() => {
-    parentItem = new TodoItem('Parent item');
-    note = new Note('Test note', { parentItem });
-    // Reset the mock before each test
-    mockDispatch.mockReset();
-  });
+	beforeEach(() => {
+		parentItem = new TodoItem('Parent item');
+		note = new Note('Test note', { parentItem });
+		// Reset the mock before each test
+		mockDispatch.mockReset();
+	});
 
-  it('should render the note content', () => {
-    render(NoteComponent, { props: { note } });
+	it('should render the note content', () => {
+		render(NoteComponent, { props: { note } });
 
-    const noteText = screen.getByTestId('note-text');
-    expect(noteText).toHaveTextContent('Test note');
+		const noteText = screen.getByTestId('note-text');
+		expect(noteText).toHaveTextContent('Test note');
 
-    const noteContent = screen.getByTestId('note-content');
-    expect(noteContent).toHaveAttribute('data-level', '0');
-  });
+		const noteContent = screen.getByTestId('note-content');
+		expect(noteContent).toHaveAttribute('data-level', '0');
+	});
 
-  it('should display sub-notes with proper indentation levels', () => {
-    const subNote = note.addSubNote('Sub note');
-    const subSubNote = subNote.addSubNote('Sub-sub note');
+	it('should display sub-notes with proper indentation levels', () => {
+		const subNote = note.addSubNote('Sub note');
+		const _subSubNote = subNote.addSubNote('Sub-sub note');
 
-    render(NoteComponent, { props: { note } });
+		render(NoteComponent, { props: { note } });
 
-    // Get all note-text elements
-    const noteTexts = screen.getAllByTestId('note-text');
-    expect(noteTexts).toHaveLength(3);
-    expect(noteTexts[0]).toHaveTextContent('Test note');
-    expect(noteTexts[1]).toHaveTextContent('Sub note');
-    expect(noteTexts[2]).toHaveTextContent('Sub-sub note');
+		// Get all note-text elements
+		const noteTexts = screen.getAllByTestId('note-text');
+		expect(noteTexts).toHaveLength(3);
+		expect(noteTexts[0]).toHaveTextContent('Test note');
+		expect(noteTexts[1]).toHaveTextContent('Sub note');
+		expect(noteTexts[2]).toHaveTextContent('Sub-sub note');
 
-    // Get all note-content elements
-    const noteContents = screen.getAllByTestId('note-content');
-    expect(noteContents).toHaveLength(3);
-    expect(noteContents[0]).toHaveAttribute('data-level', '0');
-    expect(noteContents[1]).toHaveAttribute('data-level', '1');
-    expect(noteContents[2]).toHaveAttribute('data-level', '2');
-  });
+		// Get all note-content elements
+		const noteContents = screen.getAllByTestId('note-content');
+		expect(noteContents).toHaveLength(3);
+		expect(noteContents[0]).toHaveAttribute('data-level', '0');
+		expect(noteContents[1]).toHaveAttribute('data-level', '1');
+		expect(noteContents[2]).toHaveAttribute('data-level', '2');
+	});
 
-  it('should allow adding a sub-note', async () => {
-    // Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
-    render(NoteComponent, { props: { note } });
+	it('should allow adding a sub-note', async () => {
+		// Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
+		render(NoteComponent, { props: { note } });
 
-    await fireEvent.click(screen.getByText('...'));
-    expect(screen.getByText('Add Sub-note')).toBeInTheDocument();
-  });
+		await fireEvent.click(screen.getByText('...'));
+		expect(screen.getByText('Add Sub-note')).toBeInTheDocument();
+	});
 
-  it('should not show add sub-note option for level 2 notes', async () => {
-    const subNote = note.addSubNote('Sub note');
-    const subSubNote = subNote.addSubNote('Sub-sub note');
+	it('should not show add sub-note option for level 2 notes', async () => {
+		const subNote = note.addSubNote('Sub note');
+		const subSubNote = subNote.addSubNote('Sub-sub note');
 
-    render(NoteComponent, { props: { note: subSubNote } });
+		render(NoteComponent, { props: { note: subSubNote } });
 
-    await fireEvent.click(screen.getByText('...'));
-    expect(screen.queryByText('Add Sub-note')).not.toBeInTheDocument();
-  });
+		await fireEvent.click(screen.getByText('...'));
+		expect(screen.queryByText('Add Sub-note')).not.toBeInTheDocument();
+	});
 
-  it('should allow creating a todo item from a note', async () => {
-    // Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
-    render(NoteComponent, { props: { note } });
+	it('should allow creating a todo item from a note', async () => {
+		// Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
+		render(NoteComponent, { props: { note } });
 
-    await fireEvent.click(screen.getByText('...'));
-    expect(screen.getByText('Create Todo')).toBeInTheDocument();
-  });
+		await fireEvent.click(screen.getByText('...'));
+		expect(screen.getByText('Create Todo')).toBeInTheDocument();
+	});
 
-  it('should allow editing a note through the menu', async () => {
-    // Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
-    render(NoteComponent, { props: { note } });
+	it('should allow editing a note through the menu', async () => {
+		// Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
+		render(NoteComponent, { props: { note } });
 
-    await fireEvent.click(screen.getByText('...'));
-    await fireEvent.click(screen.getByText('Edit'));
+		await fireEvent.click(screen.getByText('...'));
+		await fireEvent.click(screen.getByText('Edit'));
 
-    expect(screen.getByDisplayValue('Test note')).toBeInTheDocument();
-    expect(screen.getByText('Save')).toBeInTheDocument();
-  });
+		expect(screen.getByDisplayValue('Test note')).toBeInTheDocument();
+		expect(screen.getByText('Save')).toBeInTheDocument();
+	});
 
-  it('should allow editing a note by clicking on the text', async () => {
-    render(NoteComponent, { props: { note } });
+	it('should allow editing a note by clicking on the text', async () => {
+		render(NoteComponent, { props: { note } });
 
-    // Click directly on the note text
-    await fireEvent.click(screen.getByTestId('note-text'));
+		// Click directly on the note text
+		await fireEvent.click(screen.getByTestId('note-text'));
 
-    expect(screen.getByDisplayValue('Test note')).toBeInTheDocument();
-    expect(screen.getByText('Save')).toBeInTheDocument();
-  });
+		expect(screen.getByDisplayValue('Test note')).toBeInTheDocument();
+		expect(screen.getByText('Save')).toBeInTheDocument();
+	});
 
-  it('should dispatch editNote event when pressing Enter while editing', async () => {
+	it('should dispatch editNote event when pressing Enter while editing', async () => {
+		render(NoteComponent, { props: { note } });
 
-    render(NoteComponent, { props: { note } });
+		// Start editing
+		await fireEvent.click(screen.getByText('...'));
+		await fireEvent.click(screen.getByText('Edit'));
 
-    // Start editing
-    await fireEvent.click(screen.getByText('...'));
-    await fireEvent.click(screen.getByText('Edit'));
+		// Edit the note and press Enter
+		const input = screen.getByDisplayValue('Test note');
+		await fireEvent.input(input, { target: { value: 'Edited note' } });
+		await fireEvent.keyDown(input, { key: 'Enter' });
 
-    // Edit the note and press Enter
-    const input = screen.getByDisplayValue('Test note');
-    await fireEvent.input(input, { target: { value: 'Edited note' } });
-    await fireEvent.keyDown(input, { key: 'Enter' });
+		// Check that the dispatch function was called with the correct arguments
+		expect(mockDispatch).toHaveBeenCalledWith('editNote', {
+			note,
+			content: 'Edited note'
+		});
+	});
 
-    // Check that the dispatch function was called with the correct arguments
-    expect(mockDispatch).toHaveBeenCalledWith('editNote', { 
-      note, 
-      content: 'Edited note' 
-    });
-  });
+	it('should allow deleting a note', async () => {
+		// Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
+		render(NoteComponent, { props: { note } });
 
-  it('should allow deleting a note', async () => {
-    // Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
-    render(NoteComponent, { props: { note } });
-
-    await fireEvent.click(screen.getByText('...'));
-    expect(screen.getByText('Delete')).toBeInTheDocument();
-  });
+		await fireEvent.click(screen.getByText('...'));
+		expect(screen.getByText('Delete')).toBeInTheDocument();
+	});
 });

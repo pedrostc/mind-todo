@@ -9,183 +9,181 @@ const mockDispatch = vi.fn();
 
 // Mock the Svelte module
 vi.mock('svelte', () => {
-  return {
-    createEventDispatcher: () => mockDispatch
-  };
+	return {
+		createEventDispatcher: () => mockDispatch
+	};
 });
 
 describe('TodoItemComponent', () => {
-  let todoItem: TodoItem;
+	let todoItem: TodoItem;
 
-  beforeEach(() => {
-    todoItem = new TodoItem('Test item');
-    // Reset the mock before each test
-    mockDispatch.mockReset();
-  });
+	beforeEach(() => {
+		todoItem = new TodoItem('Test item');
+		// Reset the mock before each test
+		mockDispatch.mockReset();
+	});
 
-  it('should render the todo item title', () => {
-    render(TodoItemComponent, { props: { item: todoItem } });
+	it('should render the todo item title', () => {
+		render(TodoItemComponent, { props: { item: todoItem } });
 
-    expect(screen.getByText('Test item')).toBeInTheDocument();
-  });
+		expect(screen.getByText('Test item')).toBeInTheDocument();
+	});
 
-  it('should allow marking an item as completed', async () => {
-    render(TodoItemComponent, { props: { item: todoItem } });
+	it('should allow marking an item as completed', async () => {
+		render(TodoItemComponent, { props: { item: todoItem } });
 
-    const checkbox = screen.getByRole('checkbox');
-    await fireEvent.click(checkbox);
+		const checkbox = screen.getByRole('checkbox');
+		await fireEvent.click(checkbox);
 
-    expect(todoItem.completed).toBe(true);
-  });
+		expect(todoItem.completed).toBe(true);
+	});
 
-  it('should display sub-items', () => {
-    const subItem = todoItem.addSubItem('Sub item');
+	it('should display sub-items', () => {
+		const _subItem = todoItem.addSubItem('Sub item');
 
-    render(TodoItemComponent, { props: { item: todoItem } });
+		render(TodoItemComponent, { props: { item: todoItem } });
 
-    expect(screen.getByText('Sub item')).toBeInTheDocument();
-  });
+		expect(screen.getByText('Sub item')).toBeInTheDocument();
+	});
 
-  it('should display notes', () => {
-    const note = todoItem.addNote('Test note');
+	it('should display notes', () => {
+		const _note = todoItem.addNote('Test note');
 
-    render(TodoItemComponent, { props: { item: todoItem } });
+		render(TodoItemComponent, { props: { item: todoItem } });
 
-    const noteText = screen.getByTestId('note-text');
-    expect(noteText).toHaveTextContent('Test note');
-  });
+		const noteText = screen.getByTestId('note-text');
+		expect(noteText).toHaveTextContent('Test note');
+	});
 
-  it('should display the age of the item if greater than 0', () => {
-    const oldItem = new TodoItem('Old item', { age: 3 });
+	it('should display the age of the item if greater than 0', () => {
+		const oldItem = new TodoItem('Old item', { age: 3 });
 
-    render(TodoItemComponent, { props: { item: oldItem } });
+		render(TodoItemComponent, { props: { item: oldItem } });
 
-    expect(screen.getByText('3 days')).toBeInTheDocument();
-  });
+		expect(screen.getByText('3 days')).toBeInTheDocument();
+	});
 
-  it('should not display the age if it is 0', () => {
-    render(TodoItemComponent, { props: { item: todoItem } });
+	it('should not display the age if it is 0', () => {
+		render(TodoItemComponent, { props: { item: todoItem } });
 
-    expect(screen.queryByText('0 days')).not.toBeInTheDocument();
-  });
+		expect(screen.queryByText('0 days')).not.toBeInTheDocument();
+	});
 
-  it('should allow adding a sub-item', async () => {
-    // Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
-    render(TodoItemComponent, { props: { item: todoItem } });
+	it('should allow adding a sub-item', async () => {
+		// Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
+		render(TodoItemComponent, { props: { item: todoItem } });
 
-    await fireEvent.click(screen.getByText('...'));
-    expect(screen.getByText('Add Sub-item')).toBeInTheDocument();
+		await fireEvent.click(screen.getByText('...'));
+		expect(screen.getByText('Add Sub-item')).toBeInTheDocument();
 
-    await fireEvent.click(screen.getByText('Add Sub-item'));
-    expect(screen.getByPlaceholderText('Add a sub-item...')).toBeInTheDocument();
-  });
+		await fireEvent.click(screen.getByText('Add Sub-item'));
+		expect(screen.getByPlaceholderText('Add a sub-item...')).toBeInTheDocument();
+	});
 
-  it('should dispatch addSubItem event when pressing Enter in sub-item input', async () => {
-    vi.spyOn(todoItem, 'addSubItem');
+	it('should dispatch addSubItem event when pressing Enter in sub-item input', async () => {
+		vi.spyOn(todoItem, 'addSubItem');
 
-    render(TodoItemComponent, { props: { item: todoItem } });
+		render(TodoItemComponent, { props: { item: todoItem } });
 
-    // Open the sub-item form
-    await fireEvent.click(screen.getByText('...'));
-    await fireEvent.click(screen.getByText('Add Sub-item'));
+		// Open the sub-item form
+		await fireEvent.click(screen.getByText('...'));
+		await fireEvent.click(screen.getByText('Add Sub-item'));
 
-    // Enter text and press Enter
-    const input = screen.getByPlaceholderText('Add a sub-item...');
-    await fireEvent.input(input, { target: { value: 'New sub-item' } });
-    await fireEvent.keyDown(input, { key: 'Enter' });
+		// Enter text and press Enter
+		const input = screen.getByPlaceholderText('Add a sub-item...');
+		await fireEvent.input(input, { target: { value: 'New sub-item' } });
+		await fireEvent.keyDown(input, { key: 'Enter' });
 
-    // Check that the dispatch function was called with the correct arguments
-    expect(mockDispatch).toHaveBeenCalledWith('addSubItem', {
-      parentItem: todoItem,
-      title: 'New sub-item'
-    });
-  });
+		// Check that the dispatch function was called with the correct arguments
+		expect(mockDispatch).toHaveBeenCalledWith('addSubItem', {
+			parentItem: todoItem,
+			title: 'New sub-item'
+		});
+	});
 
-  it('should allow adding a note', async () => {
-    // Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
-    render(TodoItemComponent, { props: { item: todoItem } });
+	it('should allow adding a note', async () => {
+		// Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
+		render(TodoItemComponent, { props: { item: todoItem } });
 
-    await fireEvent.click(screen.getByText('...'));
-    expect(screen.getByText('Add Note')).toBeInTheDocument();
+		await fireEvent.click(screen.getByText('...'));
+		expect(screen.getByText('Add Note')).toBeInTheDocument();
 
-    await fireEvent.click(screen.getByText('Add Note'));
-    expect(screen.getByPlaceholderText('Add a note...')).toBeInTheDocument();
-  });
+		await fireEvent.click(screen.getByText('Add Note'));
+		expect(screen.getByPlaceholderText('Add a note...')).toBeInTheDocument();
+	});
 
-  it('should dispatch addNote event when pressing Enter in note input', async () => {
+	it('should dispatch addNote event when pressing Enter in note input', async () => {
+		render(TodoItemComponent, { props: { item: todoItem } });
 
-    render(TodoItemComponent, { props: { item: todoItem } });
+		// Open the note form
+		await fireEvent.click(screen.getByText('...'));
+		await fireEvent.click(screen.getByText('Add Note'));
 
-    // Open the note form
-    await fireEvent.click(screen.getByText('...'));
-    await fireEvent.click(screen.getByText('Add Note'));
+		// Enter text and press Enter
+		const input = screen.getByPlaceholderText('Add a note...');
+		await fireEvent.input(input, { target: { value: 'New note' } });
+		await fireEvent.keyDown(input, { key: 'Enter' });
 
-    // Enter text and press Enter
-    const input = screen.getByPlaceholderText('Add a note...');
-    await fireEvent.input(input, { target: { value: 'New note' } });
-    await fireEvent.keyDown(input, { key: 'Enter' });
+		// Check that the dispatch function was called with the correct arguments
+		expect(mockDispatch).toHaveBeenCalledWith('addNote', {
+			parentItem: todoItem,
+			content: 'New note'
+		});
+	});
 
-    // Check that the dispatch function was called with the correct arguments
-    expect(mockDispatch).toHaveBeenCalledWith('addNote', {
-      parentItem: todoItem,
-      content: 'New note'
-    });
-  });
+	it('should allow creating a todo item from a note', async () => {
+		// Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
+		const _note = todoItem.addNote('Test note');
 
-  it('should allow creating a todo item from a note', async () => {
-    // Since we can't use component.$on in Svelte 5, we'll just test that the UI elements are displayed correctly
-    const note = todoItem.addNote('Test note');
+		render(TodoItemComponent, { props: { item: todoItem } });
 
-    render(TodoItemComponent, { props: { item: todoItem } });
+		// Open the note's menu
+		await fireEvent.click(screen.getAllByText('...')[1]);
+		expect(screen.getByText('Create Todo')).toBeInTheDocument();
+	});
 
-    // Open the note's menu
-    await fireEvent.click(screen.getAllByText('...')[1]);
-    expect(screen.getByText('Create Todo')).toBeInTheDocument();
-  });
+	it('should allow editing a todo item through the menu', async () => {
+		render(TodoItemComponent, { props: { item: todoItem } });
 
-  it('should allow editing a todo item through the menu', async () => {
-    render(TodoItemComponent, { props: { item: todoItem } });
+		// Open the menu
+		await fireEvent.click(screen.getByText('...'));
+		expect(screen.getByText('Edit')).toBeInTheDocument();
 
-    // Open the menu
-    await fireEvent.click(screen.getByText('...'));
-    expect(screen.getByText('Edit')).toBeInTheDocument();
+		// Click the Edit button
+		await fireEvent.click(screen.getByText('Edit'));
 
-    // Click the Edit button
-    await fireEvent.click(screen.getByText('Edit'));
+		// Check that the edit form is displayed with the current title
+		const input = screen.getByDisplayValue('Test item');
+		expect(input).toBeInTheDocument();
+	});
 
-    // Check that the edit form is displayed with the current title
-    const input = screen.getByDisplayValue('Test item');
-    expect(input).toBeInTheDocument();
-  });
+	it('should allow editing a todo item by clicking on the text', async () => {
+		render(TodoItemComponent, { props: { item: todoItem } });
 
-  it('should allow editing a todo item by clicking on the text', async () => {
-    render(TodoItemComponent, { props: { item: todoItem } });
+		// Click directly on the todo item text
+		await fireEvent.click(screen.getByText('Test item'));
 
-    // Click directly on the todo item text
-    await fireEvent.click(screen.getByText('Test item'));
+		// Check that the edit form is displayed with the current title
+		const input = screen.getByDisplayValue('Test item');
+		expect(input).toBeInTheDocument();
+	});
 
-    // Check that the edit form is displayed with the current title
-    const input = screen.getByDisplayValue('Test item');
-    expect(input).toBeInTheDocument();
-  });
+	it('should dispatch editItem event when saving an edit', async () => {
+		render(TodoItemComponent, { props: { item: todoItem } });
 
-  it('should dispatch editItem event when saving an edit', async () => {
+		// Open the menu and click Edit
+		await fireEvent.click(screen.getByText('...'));
+		await fireEvent.click(screen.getByText('Edit'));
 
-    render(TodoItemComponent, { props: { item: todoItem } });
+		// Edit the title and save
+		const input = screen.getByDisplayValue('Test item');
+		await fireEvent.input(input, { target: { value: 'Updated item' } });
+		await fireEvent.click(screen.getByText('Save'));
 
-    // Open the menu and click Edit
-    await fireEvent.click(screen.getByText('...'));
-    await fireEvent.click(screen.getByText('Edit'));
-
-    // Edit the title and save
-    const input = screen.getByDisplayValue('Test item');
-    await fireEvent.input(input, { target: { value: 'Updated item' } });
-    await fireEvent.click(screen.getByText('Save'));
-
-    // Check that the dispatch function was called with the correct arguments
-    expect(mockDispatch).toHaveBeenCalledWith('editItem', {
-      item: todoItem,
-      title: 'Updated item'
-    });
-  });
+		// Check that the dispatch function was called with the correct arguments
+		expect(mockDispatch).toHaveBeenCalledWith('editItem', {
+			item: todoItem,
+			title: 'Updated item'
+		});
+	});
 });
