@@ -6,7 +6,7 @@
 	export let note: Note;
 
 	const dispatch = createEventDispatcher();
-	const menuId = `note-${note.id || note.content.substring(0, 10)}`;
+	const menuId = `note-${note.id != null ? note.id : note.content.substring(0, 10)}`;
 
 	// Subscribe to the activeMenuId store to determine if this menu is active
 	let isMenuActive = false;
