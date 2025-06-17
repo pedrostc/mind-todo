@@ -152,7 +152,7 @@
 	}
 </script>
 
-<div class="todo-item" role="application" on:contextmenu={(event) => { closeAllMenus(); toggleMenu(); event.preventDefault(); event.stopPropagation(); }}>
+<div class="todo-item" role="menu" on:contextmenu={(event) => { closeAllMenus(); toggleMenu(); event.preventDefault(); event.stopPropagation(); }}>
 	{#if isEditing}
 		<div class="edit-container">
 			<input
